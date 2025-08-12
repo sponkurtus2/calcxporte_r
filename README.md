@@ -1,6 +1,6 @@
 # Calcxporte_r
 
-`calcxporte_r` is a Rust command-line tool that integrates with the `calcure` TUI calendar. It reads your scheduled events from `calcure`'s data file, formats them into a styled HTML email, and sends you a daily reminder using the Resend email API.
+`calcxporte_r` is a Rust command-line tool that integrates with the [`calcure`](https://github.com/anufrievroman/calcure) TUI calendar. It reads your scheduled events from `calcure`'s data file, formats them into a styled HTML email, and sends you a daily reminder using the Resend email API.
 
 ## How It Works
 
