@@ -1,23 +1,73 @@
-# Calcure Email Reminder
+# Calcxporte_r
 
-## Overview
-This Rust application integrates with the `calcure` TUI calendar tool to send daily email reminders for events listed in the `events.csv` file. It reads events, generates an HTML email with styled event details, and sends it using the Resend email API.
+`calcxporte_r` is a Rust command-line tool that integrates with the `calcure` TUI calendar. It reads your scheduled events from `calcure`'s data file, formats them into a styled HTML email, and sends you a daily reminder using the Resend email API.
 
-## Features
-- Reads events from `~/.config/calcure/events.csv`.
-- Generates a styled HTML email listing events with their dates and urgency levels.
-- Sends the email via the Resend API.
-- Supports two urgency levels: `Normal` and `Important`.
-- Configurable via environment variables.
+## How It Works
+
+The application executes the following steps:
+1.  Loads environment variables (API Key, recipient emails) from a `.env` file.
+2.  Locates the `calcure` events file at `~/.config/calcure/events.csv`.
+3.  Creates a temporary copy of this file named `events.csv` in the project's root directory. It prepends the necessary CSV headers (`id,year,month,day,...`) to this copy to enable correct parsing, without modifying your original `calcure` file.
+4.  Parses the event data from the temporary CSV file.
+5.  Generates a clean, styled HTML body that lists each event with its date and urgency level. Events marked as `important` are highlighted differently from those marked `normal`.
+6.  Uses the Resend API to send the generated HTML as an email to your configured recipient address.
 
 ## Prerequisites
-- Rust (stable, version 1.65 or higher recommended).
-- Access to the Resend email API with a valid API key.
-- A `calcure` installation with an `events.csv` file located at `~/.config/calcure/events.csv`.
-- The `events.csv` must have the following columns: `id`, `year`, `month`, `day`, `event_name`, `not_used_int`, `not_used_string`, `urgency`.
 
-## Installation
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+Before you begin, ensure you have the following:
+*   **Rust**: Version 1.65 or higher.
+*   **Calcure**: A working installation of `calcure` with events stored in `~/.config/calcure/events.csv`.
+*   **Resend Account**: A Resend account with a generated API key and a configured sending domain/email address.
+
+## Setup and Configuration
+
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/sponkurtus2/calcxporte_r.git
+    cd calcxporte_r
+    ```
+
+2.  **Configure Environment Variables**
+    Create a `.env` file in the project root by copying the example file:
+    ```bash
+    cp .env.example .env
+    ```
+    Open the `.env` file and fill in your details:
+    ```ini
+    # Your secret API key from Resend.
+    API_KEY=YOUR_RESEND_API_KEY
+    
+    # The email address that will receive the reminder.
+    RECEIVER_EMAIL=your.email@example.com
+    
+    # The "from" email address configured in your Resend account.
+    FROM_RESEND_EMAIL=sender@your-resend-domain.com
+    ```
+
+## Usage
+
+To run the application and send a reminder email, execute the following command from the project's root directory:
+```bash
+cargo run --release
+```
+The program will read your `calcure` events and send the email immediately.
+
+## Automating Daily Reminders
+
+For automatic daily reminders, you can schedule the application to run using a cron job.
+
+1.  First, build the optimized release binary:
+    ```bash
+    cargo build --release
+    ```
+    The executable will be located at `target/release/calcxporteR`.
+
+2.  Open your crontab for editing:
+    ```bash
+    crontab -e
+    ```
+
+3.  Add a new line to schedule the job. The following example runs the application every day at 8:00 AM. Make sure to replace `/path/to/your/project` with the absolute path to the `calcxporte_r` directory.
+    ```crontab
+    # Send calcure email reminder every day at 8:00 AM
+    0 8 * * * cd /path/to/your/project/calcxporte_r && ./target/release/calcxporteR
